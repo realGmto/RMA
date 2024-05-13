@@ -51,6 +51,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import rma.lv1.view.LoginRegisterScreen
+import rma.lv1.view.MainScreen
+import rma.lv1.view.StepCounter
+import rma.lv1.viewmodel.LoginRegisterViewModel
+import rma.lv1.viewmodel.StepsViewModel
 import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
@@ -67,244 +72,19 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
 
-                    NavHost(navController = navController, startDestination = "main_screen") {
+                    NavHost(navController = navController, startDestination = "loginRegister_screen") {
+                        composable("loginRegister_screen"){
+                            LoginRegisterScreen(navController = navController, viewModel = LoginRegisterViewModel())
+                        }
                         composable("main_screen") {
                             MainScreen(navController = navController)
                         }
                         composable("step_counter") {
-                            StepCounter(navController = navController)
+                            StepCounter(navController = navController, StepsViewModel())
                         }
                     }
                 }
             }
         }
     }
-}
-
-    @Composable
-    fun MainScreen(navController: NavController) {
-        Box(
-            modifier = Modifier.fillMaxSize(), contentAlignment =
-            Alignment.Center
-        ) {
-            BackgroundImage(modifier = Modifier.fillMaxSize())
-            UserPreview("Nikola")
-            // Button to navigate to StepCounter
-            Button(
-                onClick = {
-                    // Navigate to OtherScreen when button clicked
-                    navController.navigate("step_counter")
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            ) {
-                Text(text = "Step Counter")
-            }
-        }
-    }
-    @Composable
-    fun StepCounter(navController: NavController) {
-        val db = Firebase.firestore
-        var steps by remember {
-            mutableStateOf(0)
-        }
-
-        db.collection("BMI").document("mKWvFApbcOYLnbnkW2vc")
-            .get()
-            .addOnSuccessListener { result ->
-                steps = result.getDouble("steps")!!.toInt()
-            }
-            .addOnFailureListener {e ->
-                Log.e("MainActivity", "Error Getting data: $e")
-            }
-
-        val sensorManager =
-            (LocalContext.current.getSystemService(Context.SENSOR_SERVICE) as
-                    SensorManager)
-        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
-
-        val triggerEventListener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent?) {
-                if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER){
-                    if(event?.values == null) {
-                        return
-                    }
-                    val alpha: Float = 0.8f
-                    var gravity = floatArrayOf(0f, 0f, 0f)
-                    var linear_acceleration = floatArrayOf(0f, 0f, 0f)
-
-                    gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
-                    gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
-                    gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
-
-                    linear_acceleration[0] = event.values[0] - gravity[0]
-                    linear_acceleration[1] = event.values[1] - gravity[1]
-                    linear_acceleration[2] = event.values[2] - gravity[2]
-
-                    val x = linear_acceleration[0]
-                    val y = linear_acceleration[1]
-                    val z = linear_acceleration[2]
-
-                    val value = sqrt(x * x + y * y + z * z)
-                    if (value > 13) {
-                        steps++
-                        db.collection("BMI").document("mKWvFApbcOYLnbnkW2vc")
-                            .update("steps", steps)
-                    }
-                }
-            }
-
-            override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-                // Do nothing
-            }
-        }
-        sensor?.also { light ->
-            sensorManager.registerListener(triggerEventListener, light, SensorManager.SENSOR_DELAY_NORMAL)
-        }
-
-
-
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            BackgroundImage(modifier = Modifier.fillMaxSize())
-            Column {
-                Text(
-                    text = "Step Count",
-                    fontSize = 20.sp
-                )
-                Spacer(modifier = Modifier.padding(16.dp))
-                Text(text = steps.toString(),
-                    fontSize = 20.sp
-                )
-            }
-            // Back button
-            Button(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp)
-            ) {
-                Text("User Info")
-            }
-        }
-    }
-
-
-@Composable
-fun UserPreview(name: String, modifier: Modifier = Modifier) {
-
-    val db = Firebase.firestore
-    var weight by remember {
-        mutableStateOf(0.0)
-    }
-    var height by remember {
-        mutableStateOf(0.0)
-    }
-    var bmi by remember {
-        mutableStateOf(0.0)
-    }
-    var newWeight by remember {
-        mutableStateOf(0.0)
-    }
-    var newHeight by remember {
-        mutableStateOf(0.0)
-    }
-
-    db.collection("BMI").document("mKWvFApbcOYLnbnkW2vc")
-        .get()
-        .addOnSuccessListener { result ->
-            weight = result.getDouble("weight")!!
-            height = result.getDouble("height")!!
-            bmi = weight / (height * height)
-        }
-        .addOnFailureListener {e ->
-            Log.e("MainActivity", "Error Getting data: $e")
-        }
-
-
-    Text(
-        text = "Pozdrav $name!",
-        fontSize = 20.sp,
-        lineHeight = 56.sp,
-        modifier= Modifier
-            .padding(top = 8.dp)
-            .padding(start = 10.dp)
-
-    )
-
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-    ) {
-
-        Text(
-            text = "Tvoj BMI je:",
-            fontSize = 55.sp,
-            lineHeight = 61.sp,
-            textAlign = TextAlign.Center,
-
-
-            )
-        Text(
-            text = String.format("%.2f", bmi),
-            fontSize = 70.sp,
-            lineHeight = 72.sp,
-            fontWeight = FontWeight.Bold,
-        )
-
-        TextField(
-            value = newWeight.toString(),
-            onValueChange = { newWeight = it.toDoubleOrNull() ?: 0.0 },
-            label = { Text("Nova Tezina:") },
-            modifier = Modifier.fillMaxWidth(0.8f)
-        )
-
-        Spacer(modifier = Modifier.width(20.dp))
-
-        TextField(
-            value = newHeight.toString(),
-            onValueChange = { newHeight = it.toDoubleOrNull() ?: 0.0 },
-            label = { Text("Nova Visina:") },
-            modifier = Modifier.fillMaxWidth(0.8f)
-        )
-
-        Button(onClick = {
-            val docRef = db.collection("BMI").document("mKWvFApbcOYLnbnkW2vc")
-            docRef.update(mapOf(
-                "weight" to newWeight,
-                "height" to newHeight
-            ))
-                .addOnSuccessListener {
-                    weight = newWeight
-                    height = newHeight
-                    bmi = weight / (height * height)
-                }
-                .addOnFailureListener { e ->
-                    // Update failed (handle error, e.g., show an error message)
-                    Log.e("MainActivity", "Error updating Tezina: $e")
-                }
-        }) {
-            Text(text = "Update")
-        }
-    }
-}
-@Composable
-fun BackgroundImage(modifier: Modifier) {
-
-    Box (modifier){ Image(
-        painter = painterResource(id = R.drawable.fitness),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        alpha = 0.1F
-    )
-    }
-}
-@Preview(showBackground = false)
-@Composable
-fun UserPreview() {
-    LV1Theme {
-        BackgroundImage(modifier = Modifier)   }
 }

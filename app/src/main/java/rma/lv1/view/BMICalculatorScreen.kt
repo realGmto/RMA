@@ -29,7 +29,7 @@ import rma.lv1.viewmodel.BMIViewModel
 fun BMICalculatorScreen(viewModel: BMIViewModel) {
     val bmi by viewModel.bmi.observeAsState()
 
-    viewModel.fetchPerson()
+    viewModel.fetchBMImodel()
 
     var weight by remember {
         mutableStateOf(0.0)
@@ -63,7 +63,7 @@ fun BMICalculatorScreen(viewModel: BMIViewModel) {
 
             )
         Text(
-            text = String.format("%.2f", viewModel.CalculateBMI()), // Probably won't work because on update this will not be called
+            text = String.format("%.2f", bmi?.BMI),
             fontSize = 70.sp,
             lineHeight = 72.sp,
             fontWeight = FontWeight.Bold,

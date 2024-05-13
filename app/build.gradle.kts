@@ -72,8 +72,8 @@ dependencies {
 
 
     implementation("androidx.activity:activity-ktx:1.9.0")
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("androidx.fragment:fragment-ktx:1.7.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     implementation ("androidx.compose.ui:ui:1.6.7")
     implementation ("androidx.compose.material:material:1.6.7")
@@ -82,5 +82,6 @@ dependencies {
     implementation ("androidx.compose.runtime:runtime-livedata:1.6.7")
 
 
-    implementation("com.google.firebase:firebase-firestore:24.9.1")
+    implementation("com.google.firebase:firebase-firestore:25.0.0")
+    implementation ("com.google.firebase:firebase-auth-ktx:23.0.0")
 }

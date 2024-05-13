@@ -1,7 +1,7 @@
 package rma.lv1.model
 
-data class PersonModel(
+data class BMIModel(
     var height: Double?,
     var weight: Double?,
-    var steps: Int?
+    var BMI: Double?
 )
