@@ -54,6 +54,7 @@ import androidx.navigation.compose.composable
 import rma.lv1.view.LoginRegisterScreen
 import rma.lv1.view.MainScreen
 import rma.lv1.view.StepCounter
+import rma.lv1.view.WeatherScreen
 import rma.lv1.viewmodel.LoginRegisterViewModel
 import rma.lv1.viewmodel.StepsViewModel
 import kotlin.math.sqrt
@@ -62,14 +63,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
             LV1Theme {
                 // A surface container using the 'background' color from the theme
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-
                 ) {
+                    WeatherScreen()
+                    /*
                     val navController = rememberNavController()
 
                     NavHost(navController = navController, startDestination = "loginRegister_screen") {
@@ -83,7 +86,7 @@ class MainActivity : ComponentActivity() {
                             StepCounter(navController = navController, StepsViewModel())
                         }
                     }
-                }
+                */}
             }
         }
     }
